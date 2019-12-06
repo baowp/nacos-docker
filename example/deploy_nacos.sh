@@ -1,0 +1,1 @@
+docker stack deploy -c cluster-hostname.yaml nacos

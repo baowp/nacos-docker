@@ -1,55 +1,32 @@
 version: "3"
 services:
-  nacos1:
-    hostname: nacos1
-    container_name: nacos1
+  nacos:
     image: nacos/nacos-server:latest
+    hostname: "nacos{{.Task.Slot}}"
+    deploy:
+      replicas: 2
+      update_config:
+        delay: 15s
+        failure_action: rollback
     volumes:
-      - ./cluster-logs/nacos1:/home/nacos/logs
+    #  - ./cluster-logs/nacos1:/home/nacos/logs
       - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
     ports:
       - "8848:8848"
       - "9555:9555"
     env_file:
       - ../env/nacos-hostname.env
-    restart: always
     depends_on:
       - mysql-master
       - mysql-slave
-
-  nacos2:
-    hostname: nacos2
-    image: nacos/nacos-server:latest
-    container_name: nacos2
-    volumes:
-      - ./cluster-logs/nacos2:/home/nacos/logs
-      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
-    ports:
-      - "8849:8848"
-    env_file:
-      - ../env/nacos-hostname.env
-    restart: always
-    depends_on:
-      - mysql-master
-      - mysql-slave
-  nacos3:
-    hostname: nacos3
-    image: nacos/nacos-server:latest
-    container_name: nacos3
-    volumes:
-      - ./cluster-logs/nacos3:/home/nacos/logs
-      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
-    ports:
-      - "8850:8848"
-    env_file:
-      - ../env/nacos-hostname.env
-    restart: always
-    depends_on:
-      - mysql-master
-      - mysql-slave
+    networks:
+      - my-swarm
   mysql-master:
-    container_name: mysql-master
+    hostname: mysql-master
     image: nacos/nacos-mysql-master:latest
+    deploy:
+      placement:
+        constraints: [node.role == manager]
     env_file:
       - ../env/mysql-common.env
       - ../env/mysql-master.env
@@ -57,9 +34,14 @@ services:
       - ./mysql-master:/var/lib/mysql
     ports:
       - "3306:3306"
+    networks:
+      - my-swarm
   mysql-slave:
-    container_name: mysql-slave
+    hostname: mysql-slave
     image: nacos/nacos-mysql-slave:latest
+    deploy:
+      placement:
+        constraints: [node.role == manager]
     env_file:
       - ../env/mysql-common.env
       - ../env/mysql-slave.env
@@ -69,4 +51,9 @@ services:
       - "3305:3306"
     depends_on:
       - mysql-master
+    networks:
+      - my-swarm
+networks:
+  my-swarm:
+    external: true
 
