@@ -1,15 +1,10 @@
 version: "3.6"
 services:
-  nacos:
+  nacos1:
     image: nacos/nacos-server:latest
-    hostname: "nacos{{.Task.Slot}}"
-    deploy:
-      replicas: 2
-      update_config:
-        delay: 15s
-        failure_action: rollback
+    hostname: "nacos1"
     volumes:
-      - ./cluster-logs/nacos{{.Task.Slot}}:/home/nacos/logs
+      - ./cluster-logs/nacos1:/home/nacos/logs
      # - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
     configs:
       - source: custom 
@@ -17,6 +12,25 @@ services:
     ports:
       - "8848:8848"
       - "9555:9555"
+    env_file:
+      - ../env/nacos-hostname.env
+    depends_on:
+      - mysql-master
+      - mysql-slave
+    networks:
+      - my-swarm
+  nacos2:
+    image: nacos/nacos-server:latest
+    hostname: "nacos2"
+    volumes:
+      - ./cluster-logs/nacos2:/home/nacos/logs
+     # - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    configs:
+      - source: custom 
+        target: /home/nacos/init.d/custom.properties
+    ports:
+      - "8849:8848"
+      - "9556:9555"
     env_file:
       - ../env/nacos-hostname.env
     depends_on:
