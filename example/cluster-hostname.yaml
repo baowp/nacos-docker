@@ -8,8 +8,10 @@ services:
       update_config:
         delay: 15s
         failure_action: rollback
+      placement:
+        constraints: [node.role == worker]
     volumes:
-    #  - ./cluster-logs/nacos1:/home/nacos/logs
+      - ./cluster-logs/nacos{{.Task.Slot}}:/home/nacos/logs
       - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
     ports:
       - "8848:8848"
