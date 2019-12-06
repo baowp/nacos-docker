@@ -1,4 +1,4 @@
-version: "3"
+version: "3.6"
 services:
   nacos:
     image: nacos/nacos-server:latest
@@ -8,13 +8,11 @@ services:
       update_config:
         delay: 15s
         failure_action: rollback
-      placement:
-        constraints: [node.role == worker]
     volumes:
       - ./cluster-logs/nacos{{.Task.Slot}}:/home/nacos/logs
      # - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
     configs:
-      - source: custom
+      - source: custom 
         target: /home/nacos/init.d/custom.properties
     ports:
       - "8848:8848"
