@@ -3,6 +3,11 @@ services:
   nacos1:
     image: nacos/nacos-server:latest
     hostname: "nacos1"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 2048M
     volumes:
       - ./cluster-logs/nacos1:/home/nacos/logs
      # - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
@@ -22,6 +27,11 @@ services:
   nacos2:
     image: nacos/nacos-server:latest
     hostname: "nacos2"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 2048M
     volumes:
       - ./cluster-logs/nacos2:/home/nacos/logs
      # - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
@@ -31,6 +41,30 @@ services:
     ports:
       - "8849:8848"
       - "9556:9555"
+    env_file:
+      - ../env/nacos-hostname.env
+    depends_on:
+      - mysql-master
+      - mysql-slave
+    networks:
+      - my-swarm
+  nacos3:
+    image: nacos/nacos-server:latest
+    hostname: nacos3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 2048M
+    volumes:
+      - ./cluster-logs/nacos3:/home/nacos/logs
+     # - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    configs:
+      - source: custom 
+        target: /home/nacos/init.d/custom.properties
+    ports:
+      - "8850:8848"
+      - "9557:9555"
     env_file:
       - ../env/nacos-hostname.env
     depends_on:
